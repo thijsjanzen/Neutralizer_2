@@ -19,7 +19,7 @@
 class simulation {
 private:
 
-  size_t L;
+
   std::vector< cell > world;
   std::vector< species > meta_community;
   std::vector<int> meta_community_octaves;
@@ -38,6 +38,7 @@ private:
 
 public:
   size_t t;
+    size_t L;
   std::vector<double> rank_abund_curve;
 
   simulation(size_t one_side,

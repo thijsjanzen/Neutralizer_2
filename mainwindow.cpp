@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
   ui->setupUi(this);
 
+
    ui->plot_species->addGraph();
    ui->plot_species->graph(0)->setPen(QPen(Qt::black));
 
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
   // ui->plot_species->plotLayout()->addElement(0, 0, fst_title);
    ui->plot_species->xAxis->setLabel("Time");
    ui->plot_species->yAxis->setLabel("Number of species");
+   ui->plot_species->setBackground(this->palette().background().color());
 
    ui->plot_rankabund->addGraph();
    ui->plot_rankabund->graph(0)->setPen(QPen(Qt::black));
@@ -35,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
   // ui->plot_rankabund->plotLayout()->addElement(0, 0, fst_title2);
    ui->plot_rankabund->xAxis->setLabel("Rank");
    ui->plot_rankabund->yAxis->setLabel("Relative abundance");
+   ui->plot_rankabund->setBackground(this->palette().background().color());
    max_rank_abund_rank = 0;
 
 
@@ -49,16 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
    meta_comm_bars->setPen(QPen(Qt::black));
    meta_comm_bars->setBrush(QBrush(QColor(0,0,255, static_cast<int>(0.9 * 255))));
 
- //  ui->plot_meta_comm->graph(0)->setName("Num Species");
- //  meta_comm_bars->setAntialiased(false);
- //  meta_comm_bars->setAntialiasedFill(false);
-
- //  QCPPlotTitle *fst_title3 = new QCPPlotTitle(ui->plot_meta_comm, "Metacommunity");
- //  fst_title3->setFont(QFont("sans", 12, QFont::Bold));
- //  ui->plot_meta_comm->plotLayout()->insertRow(0);
- //  ui->plot_meta_comm->plotLayout()->addElement(0, 0, fst_title3);
    ui->plot_meta_comm->xAxis->setLabel("Number of Individuals per Species");
    ui->plot_meta_comm->yAxis->setLabel("Number of Species");
+   ui->plot_meta_comm->setBackground(this->palette().background().color());
+
 
    ui->plot_local_comm->addGraph();
 
@@ -70,16 +67,11 @@ MainWindow::MainWindow(QWidget *parent)
    local_comm_bars->setPen(QPen(Qt::black));
    local_comm_bars->setBrush(QBrush(QColor(0,0,255, static_cast<int>(0.9 * 255))));
 
- //  ui->plot_local_comm->graph(0)->setName("Local Community");
-  // local_comm_bars->setAntialiased(false);
-  // local_comm_bars->setAntialiasedFill(false);
-
-  // QCPPlotTitle *fst_title4 = new QCPPlotTitle(ui->plot_local_comm, "Local community");
-  // fst_title4->setFont(QFont("sans", 12, QFont::Bold));
- //  ui->plot_local_comm->plotLayout()->insertRow(0);
-  // ui->plot_local_comm->plotLayout()->addElement(0, 0, fst_title4);
    ui->plot_local_comm->xAxis->setLabel("Number of Individuals per Species");
    ui->plot_local_comm->yAxis->setLabel("Number of Species");
+   ui->plot_local_comm->setBackground(this->palette().background().color());
+
+
 }
 
 MainWindow::~MainWindow()
@@ -141,7 +133,8 @@ void MainWindow::on_update_params_clicked()
                         meta_comm_bars,
                         sim->get_meta_octaves(),
                         dummy_max_y);
-
+    max_rank_abund_rank = 0;
+    max_local_comm_bars = 0;
     update_plots(0);
     ui->button_start->setText("Start");
     auto s = std::to_string(sim->num_species());
@@ -208,13 +201,12 @@ void MainWindow::update_plots(double t) {
   ui->plot_species->xAxis->setRange(0, max_x);
 
   ui->plot_species->xAxis->setAutoTickStep(false);
-  double tick_step = max_x / 8;
+  double tick_step = std::round(max_x / 8);
   ui->plot_species->xAxis->setTickStep(tick_step);
   ui->plot_species->xAxis->setTickLabelRotation(45);
 
 
   ui->plot_species->replot();
-
 
   ui->plot_rankabund->graph(0)->clearData();
 
@@ -247,7 +239,9 @@ void MainWindow::on_button_start_clicked()
   is_running = true;
   while(true) {
     sim->update();
-    if (sim->t % update_speed == 0) {
+    size_t update_step = 1 + 0.01 * update_speed * sim->L * sim->L;
+
+    if (sim->t % update_step == 0) {
         sim->update_stats();
         update_display();
         update_plots(sim->t);
