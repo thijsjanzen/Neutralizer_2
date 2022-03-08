@@ -56,8 +56,11 @@ private:
   int max_local_comm_bars;
   int max_rank_abund_rank;
 
-
+  void replot_graphs();
   void set_resolution(int width, int height);
-  void update_plots(double t);
+  void update_plots(double t,
+                    const std::vector<double>& sp_area_x,
+                    const std::vector<double>& sp_area_y);
+  void update_params();
 };
 #endif // MAINWINDOW_HPP

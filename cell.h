@@ -24,32 +24,6 @@ struct species {
     }
   }
 
-  species(const species& other) {
-    id_ = other.id_;
-    count_ = other.count_;
-    color_ = other.color_;
-  }
-
-  species& operator=(const species& other) {
-    id_ = other.id_;
-    count_ = other.count_;
-    color_ = other.color_;
-    return *this;
-  }
-
-  species(const species&& other) {
-    id_ = other.id_;
-    count_ = other.count_;
-    color_ = other.color_;
-  }
-
-  species& operator=(const species&& other) {
-    id_ = other.id_;
-    count_ = other.count_;
-    color_ = other.color_;
-    return *this;
-  }
-
   species() {
     count_ = 0;
     // fake data, using default rng:
@@ -59,14 +33,23 @@ struct species {
     }
   }
 
+  bool operator==(const species& other) const {
+    if (id_ != other.id_) return false;
+    if (color_[0] != other.color_[0]) return false;
+    if (color_[1] != other.color_[1]) return false;
+    if (color_[2] != other.color_[2]) return false;
+    return true;
+  }
+
   const std::array<size_t, 3>& get_color() const noexcept{
-    // test color
     return color_;
   }
 
 private:
   std::array<size_t, 3> color_;
 };
+
+
 
 
 struct cell {

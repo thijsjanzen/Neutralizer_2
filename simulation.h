@@ -167,38 +167,7 @@ public:
     return convert_to_pos(target_x, target_y);
   }
 
-  size_t get_coordinate_rand(size_t source_x,
-                        size_t source_y) {
 
-    int distance = 1 + static_cast<int>(rndgen_.uniform() * dispersal_range);
-    double dx = 0;
-    double dy = 0;
-    for (size_t i = 0; i < distance; ++i) {
-      double d = -1 + rndgen_.random_number(3);
-      if (rndgen_.bernouilli(0.5)) {
-          dx += d;
-      } else {
-          dy += d;
-        }
-    }
-
-    double prop_x = std::round(source_x + dx);
-    double prop_y = std::round(source_y + dy);
-
-    if (prop_x >= L) prop_x -= L;
-    if (prop_x < 0)  prop_x += L;
-    if (prop_y >= L) prop_y -= L;
-    if (prop_y < 0)  prop_y += L;
-
-    size_t target_x = static_cast<size_t>(prop_x);
-    size_t target_y = static_cast<size_t>(prop_y);
-
-    if (target_x == source_x && target_y == source_y) {
-        return get_coordinate(source_x, source_y);
-    }
-
-    return convert_to_pos(target_x, target_y);
-  }
 
   species local_reproduction(size_t source_index) {
     auto pos = get_coordinate(world[source_index].x_,
@@ -313,6 +282,37 @@ public:
 
   int num_species() {
     return histogram_local_comm.size();
+  }
+
+  void update_species_area(std::vector< double >& area,
+                           std::vector< double >& num_species) {
+
+    area.clear();
+    num_species.clear();
+    std::vector< species > found_species;
+
+    for(size_t x = 0; x < L; ++x) {
+        for(size_t y = 0; y <= x; ++y) {
+            auto pos = convert_to_pos(x, y );
+            bool match = false;
+            auto local = world[pos].get_species();
+            for (const auto& i : found_species) {
+              if(i == local) {
+                    match = true;
+                    break;
+              }
+            }
+
+            if(!match) {
+                found_species.push_back(local);
+            }
+          }
+        if(x > 0) {
+            area.push_back( static_cast<double>(x * x) );
+            num_species.push_back(static_cast<double>(found_species.size()));
+        }
+      }
+    return;
   }
 };
 
